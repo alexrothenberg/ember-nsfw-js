@@ -5,6 +5,20 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
+    autoImport: {
+      webpack: {
+        node: {
+          module: 'empty',
+          dgram: 'empty',
+          dns: 'mock',
+          fs: 'empty',
+          http2: 'empty',
+          net: 'empty',
+          tls: 'empty',
+          child_process: 'empty',
+        }
+      }
+    }
   });
 
   // Use `app.import` to add additional libraries to the generated

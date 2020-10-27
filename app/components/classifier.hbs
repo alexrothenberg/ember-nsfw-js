@@ -1,0 +1,13 @@
+Hi classifier
+
+<button type="button" {{on 'click' this.classify}}>
+  <img alt="blah" src="images/alex.png" height="100" width="100">
+</button>
+
+<ul>
+  {{#each this.predictions as |prediction|}}
+    <li>
+      {{prediction.className}} - {{prediction.probability}}
+    </li>
+  {{/each}}
+</ul>
