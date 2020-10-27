@@ -1,13 +1,27 @@
-Hi classifier
+<button type="button" {{on 'click' this.classify}}>
+  <img alt="blah" src="images/alex1.png" style="max-width:250px; max-height:200px;">
+</button>
 
 <button type="button" {{on 'click' this.classify}}>
-  <img alt="blah" src="images/alex.png" height="100" width="100">
+  <img alt="blah" src="images/alex2.png" style="max-width:250px; max-height:200px;">
+</button>
+
+<button type="button" {{on 'click' this.classify}}>
+  <img alt="blah" src="images/alex3.jpg" style="max-width:250px; max-height:200px;">
+</button>
+
+<button type="button" {{on 'click' this.classify}}>
+  <img alt="blah" src="images/alex4.jpg" style="max-width:250px; max-height:200px;">
+</button>
+
+<button type="button" {{on 'click' this.classify}}>
+  <img alt="blah" src="images/alex5.jpg" style="max-width:250px; max-height:200px;">
 </button>
 
 <ul>
   {{#each this.predictions as |prediction|}}
     <li>
-      {{prediction.className}} - {{prediction.probability}}
+      {{prediction.className}} - {{percentage prediction.probability decimals=2}}
     </li>
   {{/each}}
 </ul>
