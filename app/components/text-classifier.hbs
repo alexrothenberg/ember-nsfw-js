@@ -4,8 +4,16 @@
   <div {{on 'click' this.positive}}>Positive</div>
   <div {{on 'click' this.negative}}>Negative</div>
 
-  {{this.text}}
+  <Textarea
+    @value={{this.text}}
+    {{on 'keypress' this.updateText}}
+    style="width: 100%; height:200px"/>
 
-  {{this.score}}
+  Positivity:
+  {{#if this.predict.isRunning}}
+    ...
+  {{else}}
+    {{percentage this.score}}
+  {{/if}}
 
 {{/if}}

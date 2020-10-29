@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { action} from '@ember/object';
 import { tracked} from '@glimmer/tracking';
 import { dropTask } from 'ember-concurrency-decorators';
+import { timeout } from 'ember-concurrency';
 import * as tf from "@tensorflow/tfjs";
 import fetch from 'fetch'
 
@@ -10,7 +11,7 @@ const OOV_INDEX = 2;  // Index fo the OOV character.
 
 export default class TextClassifierComponent extends Component {
   @tracked
-  text = "hi there";
+  text = "die hard mario fan and i loved this game br br this game starts slightly boring but trust me it's worth it as soon as you start your hooked the levels are fun and exiting they will hook you OOV your mind turns to mush i'm not kidding this game is also orchestrated and is beautifully done br br to keep this spoiler free i have to keep my mouth shut about details but please try this game it'll be worth it br br story 9 9 action 10 1 it's that good OOV 10 attention OOV 10 average 10";
 
   @tracked score = "";
 
@@ -20,7 +21,12 @@ export default class TextClassifierComponent extends Component {
   constructor() {
     super(...arguments);
 
-    this.loadModel.perform();
+    this.init();
+  }
+
+  async init() {
+    await this.loadModel.perform();
+    await this.predict.perform(this.text);
   }
 
   get loadedModel() {
@@ -38,13 +44,16 @@ export default class TextClassifierComponent extends Component {
   @action
   positive() {
     this.text = "die hard mario fan and i loved this game br br this game starts slightly boring but trust me it's worth it as soon as you start your hooked the levels are fun and exiting they will hook you OOV your mind turns to mush i'm not kidding this game is also orchestrated and is beautifully done br br to keep this spoiler free i have to keep my mouth shut about details but please try this game it'll be worth it br br story 9 9 action 10 1 it's that good OOV 10 attention OOV 10 average 10"
-    this.predict(this.text)
   }
 
   @action
   negative() {
     this.text = "the mother in this movie is reckless with her children to the point of neglect i wish i wasn't so angry about her and her actions because i would have otherwise enjoyed the flick what a number she was take my advise and fast forward through everything you see her do until the end also is anyone else getting sick of watching movies that are filmed so dark anymore one can hardly see what is being filmed as an audience we are impossibly involved with the actions on the screen so then why the hell can't we have night vision"
-    this.predict(this.text)
+  }
+
+  @action
+  updateText() {
+    this.predict.perform(this.text);
   }
 
   @dropTask
@@ -54,27 +63,14 @@ export default class TextClassifierComponent extends Component {
 
     const metadataJson = yield fetch(`${baseUrl}/metadata.json`);
     const metadata = yield metadataJson.json();
-    // this.indexFrom = sentimentMetadata['index_from'];
-    // this.maxLen = sentimentMetadata['max_len'];
-    // console.log('indexFrom = ' + this.indexFrom);
-    // console.log('maxLen = ' + this.maxLen);
-
-    // this.wordIndex = sentimentMetadata['word_index'];
-    // this.vocabularySize = sentimentMetadata['vocabulary_size'];
-
-    // const endpoints = model.layers.mapBy('name');
-
-    // // Warmup the model.
-    // const result = tf.tidy(() =>
-    //   model.predict(tf.zeros([1, this.size, this.size, 3]))
-    // );
-    // yield result.data();
-    // result.dispose();
 
     return { model, metadata }
   }
 
-  async predict(text) {
+  @dropTask
+  *predict(text) {
+    yield timeout(1000)
+
     // Convert to lower case and remove all punctuations.
     const inputText =
         text.trim().toLowerCase().replace(/(\.|\,|\!)/g, '').split(' ');
