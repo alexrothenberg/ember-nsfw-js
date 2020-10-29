@@ -1,0 +1,11 @@
+{{#if this.loadModel.isRunning}}
+  Loading model...
+{{else}}
+  <div {{on 'click' this.positive}}>Positive</div>
+  <div {{on 'click' this.negative}}>Negative</div>
+
+  {{this.text}}
+
+  {{this.score}}
+
+{{/if}}
