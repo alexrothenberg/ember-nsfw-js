@@ -2,10 +2,8 @@ import Component from '@glimmer/component';
 import { action} from '@ember/object';
 import { tracked} from '@glimmer/tracking';
 import { dropTask } from 'ember-concurrency-decorators';
-import { load }  from "nsfwjs";
 import * as tf from "@tensorflow/tfjs";
 
-const DIRECT_TENSOR_FLOW = true
 export default class ClassifierComponent extends Component {
   @tracked
   predictions = [];
@@ -34,47 +32,32 @@ export default class ClassifierComponent extends Component {
 
   @dropTask
   *loadModel() {
-    if (DIRECT_TENSOR_FLOW) {
-      const model = yield tf.loadLayersModel('/tfjs_quant_nsfw_mobilenet/model.json')
-      const endpoints = model.layers.mapBy('name');
+    const model = yield tf.loadLayersModel('/tfjs_quant_nsfw_mobilenet/model.json')
+    const endpoints = model.layers.mapBy('name');
 
-      // Warmup the model.
-      const result = tf.tidy(() =>
-        model.predict(tf.zeros([1, this.size, this.size, 3]))
-      );
-      yield result.data();
-      result.dispose();
+    // Warmup the model.
+    const result = tf.tidy(() =>
+      model.predict(tf.zeros([1, this.size, this.size, 3]))
+    );
+    yield result.data();
+    result.dispose();
 
-      return { model, endpoints }
-    } else {
-      return yield load('/tfjs_quant_nsfw_mobilenet/');
-    }
+    return { model, endpoints }
   }
 
   @action
   async classify({target}) {
-    if (DIRECT_TENSOR_FLOW) {
-      const logits = this.infer(target);
+    const logits = this.infer(target);
 
-      const topk = 5;
-      const classes = await this.getTopKClasses(logits, topk);
+    const topk = 5;
+    const classes = await this.getTopKClasses(logits, topk);
 
-      logits.dispose();
+    logits.dispose();
 
-      this.predictions = classes;
-    } else {
-      this.predictions = await this.model.classify(target);
-    }
+    this.predictions = classes;
   }
 
   infer(img) {
-    // if (!this.endpoints.includes(endpoint)) {
-    //   throw new Error(
-    //     `Unknown endpoint ${endpoint}. Available endpoints: ` +
-    //       `${this.endpoints}.`
-    //   );
-    // }
-
     return tf.tidy(() => {
       if (!(img instanceof tf.Tensor)) {
         img = tf.browser.fromPixels(img);
@@ -107,7 +90,7 @@ export default class ClassifierComponent extends Component {
 
   async getTopKClasses(logits, topK) {
     // I guess this is baked into the model maybe?
-    const NSFW_CLASSES = {
+    const IMAGE_TYPES = {
       0: 'Drawing',
       1: 'Hentai',
       2: 'Neutral',
@@ -118,7 +101,7 @@ export default class ClassifierComponent extends Component {
     const values = Array.from(await logits.data());
     return values.map((value, index)=> {
       return {
-        className: NSFW_CLASSES[index],
+        className: IMAGE_TYPES[index],
         probability: value
       }
     }).sortBy('probability').reverse();
